@@ -15,7 +15,6 @@ export async function updateSession(request: NextRequest) {
   })
 
   try {
-    console.log("[v0] Middleware: creating Supabase client for path:", request.nextUrl.pathname)
     const supabase = createServerClient(
       supabaseUrl,
       supabaseAnonKey,
@@ -46,38 +45,18 @@ export async function updateSession(request: NextRequest) {
     const pathname = request.nextUrl.pathname
 
     // Public routes that don't require auth
-    const publicRoutes = ['/login', '/signup-admin']
-    const isPublicRoute = publicRoutes.some(r => pathname.startsWith(r))
+    const publicRoutes = ['/', '/login', '/signup-admin']
+    const isPublicRoute = publicRoutes.some(r => pathname === r || (r !== '/' && pathname.startsWith(r)))
 
-    if (!user && !isPublicRoute && pathname !== '/') {
+    // Redirect unauthenticated users to login (except public routes)
+    if (!user && !isPublicRoute) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       return NextResponse.redirect(url)
     }
 
-    // If user is logged in and goes to login/signup pages, redirect based on role
-    if (user && isPublicRoute) {
-      const url = request.nextUrl.clone()
-      const isAdmin = user.user_metadata?.is_admin === true
-      url.pathname = isAdmin ? '/admin' : '/equipe'
-      return NextResponse.redirect(url)
-    }
-
-    // Redirect root to login
-    if (pathname === '/') {
-      const url = request.nextUrl.clone()
-      if (user) {
-        const isAdmin = user.user_metadata?.is_admin === true
-        url.pathname = isAdmin ? '/admin' : '/equipe'
-      } else {
-        url.pathname = '/login'
-      }
-      return NextResponse.redirect(url)
-    }
-
     return supabaseResponse
-  } catch (error) {
-    console.log("[v0] Middleware error:", error)
+  } catch {
     // If Supabase fails, pass through to avoid crashing
     return NextResponse.next({ request })
   }
