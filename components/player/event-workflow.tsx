@@ -112,6 +112,7 @@ export function EventWorkflow({
           isDG={isDG}
           isCurrent={currentStep === 3}
           isLocked={isLocked || currentStep > 3}
+          joueur={joueur}
         />
       )}
 
@@ -332,10 +333,10 @@ function Step2Votes({
 }
 
 function Step3DGValidation({
-  workflow, options, dgValidation, isDG, isCurrent, isLocked,
+  workflow, options, dgValidation, isDG, isCurrent, isLocked, joueur,
 }: {
   workflow: any; options: any[]; dgValidation: any; isDG: boolean
-  isCurrent: boolean; isLocked: boolean
+  isCurrent: boolean; isLocked: boolean; joueur: any
 }) {
   const [selectedOption, setSelectedOption] = useState(workflow?.option_choisie_id || "")
   const [justification, setJustification] = useState("")
@@ -353,7 +354,7 @@ function Step3DGValidation({
 
     await supabase.from("validation_dg").insert({
       workflow_equipe_id: workflow.id,
-      joueur_id: (await supabase.auth.getUser()).data.user?.id,
+      joueur_id: joueur.id,
       option_validee_id: selectedOption,
       justification,
       a_change_option: changedOption,

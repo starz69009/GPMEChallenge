@@ -214,56 +214,58 @@ function TeamWorkflowRow({
   const isDone = workflow?.statut === "termine"
 
   return (
-    <div className="flex items-center gap-4 rounded-lg border border-border p-3">
-      <div className="flex items-center gap-2 w-36">
-        <div className="h-3 w-3 rounded-full" style={{ backgroundColor: equipe.couleur }} />
-        <span className="text-sm font-medium text-foreground">{equipe.nom}</span>
-      </div>
-      <div className="flex flex-1 items-center gap-1">
-        {stepLabels.map((label, i) => {
-          const step = i + 1
-          const isCompleted = isDone || currentStep > step
-          const isCurrent = !isDone && currentStep === step
-          return (
-            <div key={step} className="flex flex-1 flex-col items-center gap-1">
-              <div
-                className={`h-2 w-full rounded-full ${
-                  isCompleted ? "bg-success" : isCurrent ? "bg-primary" : "bg-muted"
-                }`}
-              />
-              <span className={`text-[10px] ${isCurrent ? "text-primary font-medium" : "text-muted-foreground"}`}>
-                {label}
-              </span>
-            </div>
-          )
-        })}
-      </div>
-      <div className="flex items-center gap-2">
-        <Badge variant="outline" className={isDone ? "bg-success/15 text-success border-success/30" : "bg-primary/15 text-primary border-primary/30"}>
-          {isDone ? "Termine" : `Etape ${currentStep}`}
-        </Badge>
-        {workflow && currentStep >= 3 && !isDone && (
-          <Button size="sm" variant="outline" onClick={() => setShowScore(!showScore)}>
-            Scorer
-          </Button>
-        )}
+    <div className="rounded-lg border border-border">
+      <div className="flex items-center gap-4 p-3">
+        <div className="flex items-center gap-2 w-36">
+          <div className="h-3 w-3 rounded-full" style={{ backgroundColor: equipe.couleur }} />
+          <span className="text-sm font-medium text-foreground">{equipe.nom}</span>
+        </div>
+        <div className="flex flex-1 items-center gap-1">
+          {stepLabels.map((label, i) => {
+            const step = i + 1
+            const isCompleted = isDone || currentStep > step
+            const isCurrent = !isDone && currentStep === step
+            return (
+              <div key={step} className="flex flex-1 flex-col items-center gap-1">
+                <div
+                  className={`h-2 w-full rounded-full ${
+                    isCompleted ? "bg-success" : isCurrent ? "bg-primary" : "bg-muted"
+                  }`}
+                />
+                <span className={`text-[10px] ${isCurrent ? "text-primary font-medium" : "text-muted-foreground"}`}>
+                  {label}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className={isDone ? "bg-success/15 text-success border-success/30" : "bg-primary/15 text-primary border-primary/30"}>
+            {isDone ? "Termine" : `Etape ${currentStep}`}
+          </Badge>
+          {workflow && currentStep >= 3 && !isDone && (
+            <Button size="sm" variant="outline" onClick={() => setShowScore(!showScore)}>
+              Scorer
+            </Button>
+          )}
+        </div>
       </div>
       {showScore && (
-        <form action={onScore} className="ml-4 flex items-center gap-2">
+        <form action={onScore} className="flex items-end gap-2 border-t border-border px-3 py-2">
           <input type="hidden" name="equipe_id" value={equipe.id} />
           <input type="hidden" name="evenement_declenche_id" value={eventId} />
           {["social", "commercial", "tresorerie", "production", "reglementaire"].map((dim) => (
-            <div key={dim} className="flex flex-col items-center">
-              <span className="text-[9px] text-muted-foreground capitalize">{dim.slice(0, 4)}</span>
+            <div key={dim} className="flex flex-col items-center gap-1">
+              <span className="text-[10px] text-muted-foreground capitalize">{dim.slice(0, 4)}</span>
               <Input
                 name={`points_${dim}`}
                 type="number"
-                className="h-7 w-14 text-center text-xs"
+                className="h-7 w-16 text-center text-xs"
                 defaultValue={workflow?.options_evenement?.[`points_${dim}`] || 0}
               />
             </div>
           ))}
-          <Button size="sm" type="submit">Valider</Button>
+          <Button size="sm" type="submit">Valider scores</Button>
         </form>
       )}
     </div>
