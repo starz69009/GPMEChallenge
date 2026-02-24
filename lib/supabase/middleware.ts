@@ -15,6 +15,7 @@ export async function updateSession(request: NextRequest) {
   })
 
   try {
+    console.log("[v0] Middleware: creating Supabase client for path:", request.nextUrl.pathname)
     const supabase = createServerClient(
       supabaseUrl,
       supabaseAnonKey,
@@ -75,7 +76,8 @@ export async function updateSession(request: NextRequest) {
     }
 
     return supabaseResponse
-  } catch {
+  } catch (error) {
+    console.log("[v0] Middleware error:", error)
     // If Supabase fails, pass through to avoid crashing
     return NextResponse.next({ request })
   }

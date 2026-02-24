@@ -6,10 +6,10 @@ export default async function AdminDashboard() {
   const supabase = await createClient()
 
   const [entreprises, sessions, equipes, joueurs] = await Promise.all([
-    supabase.from("entreprises").select("id", { count: "exact" }),
-    supabase.from("sessions").select("id", { count: "exact" }),
-    supabase.from("equipes").select("id", { count: "exact" }),
-    supabase.from("joueurs").select("id", { count: "exact" }).eq("is_admin", false),
+    supabase.from("entreprises").select("*", { count: "exact", head: true }),
+    supabase.from("sessions").select("*", { count: "exact", head: true }),
+    supabase.from("equipes").select("*", { count: "exact", head: true }),
+    supabase.from("joueurs").select("*", { count: "exact", head: true }).eq("is_admin", false),
   ])
 
   const stats = [

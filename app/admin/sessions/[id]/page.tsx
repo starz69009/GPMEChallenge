@@ -14,19 +14,25 @@ export default async function SessionDetailPage({ params }: { params: Promise<{ 
 
   if (!session) notFound()
 
-  const [evenementsRes, eventsRes, equipesRes, workflowsRes] = await Promise.all([
+  const [evenementsRes, eventsRes, equipesRes] = await Promise.all([
     supabase.from("evenements").select("id, titre, domaine").order("titre"),
     supabase.from("evenements_declenches")
       .select("*, evenements(titre, domaine)")
       .eq("session_id", id)
       .order("created_at", { ascending: false }),
     supabase.from("equipes").select("id, nom, couleur").eq("session_id", id),
-    supabase.from("workflow_equipes")
-      .select("*, equipes(nom, couleur), options_evenement(label, points_social, points_commercial, points_tresorerie, points_production, points_reglementaire), votes(*), validation_dg(*, options_evenement(label))")
-      .in("evenement_declenche_id", 
-        (await supabase.from("evenements_declenches").select("id").eq("session_id", id)).data?.map(e => e.id) || []
-      ),
   ])
+
+  // Get triggered event IDs, then fetch workflows only if there are any
+  const triggeredIds = eventsRes.data?.map(e => e.id) ?? []
+  let workflowsData: any[] = []
+  if (triggeredIds.length > 0) {
+    const { data } = await supabase
+      .from("workflow_equipes")
+      .select("*, equipes(nom, couleur), options_evenement(label, points_social, points_commercial, points_tresorerie, points_production, points_reglementaire)")
+      .in("evenement_declenche_id", triggeredIds)
+    workflowsData = data ?? []
+  }
 
   return (
     <SessionDetailClient
@@ -34,7 +40,7 @@ export default async function SessionDetailPage({ params }: { params: Promise<{ 
       allEvents={evenementsRes.data ?? []}
       triggeredEvents={eventsRes.data ?? []}
       equipes={equipesRes.data ?? []}
-      workflows={workflowsRes.data ?? []}
+      workflows={workflowsData}
     />
   )
 }
